@@ -3,16 +3,16 @@ import json
 import codecs
 import pandas as pd
 import re
-import jieba
 import logging
 import numpy as np
-import utils
+from news_clf import utils
 from time import time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import BernoulliNB, ComplementNB, MultinomialNB
 from joblib import dump, load
 from sklearn import metrics
 from sklearn.utils.extmath import density
+from news_clf import predict
 
 
 def read_json():
@@ -26,16 +26,30 @@ def read_json():
 def splice(s):
     return s[:2]
 
+
 # extract sample
-def select_sample():
-    df = pd.read_csv('./data/fold/sample.csv')
-    # df['category'] = df['category'].apply(splice)
-    # df.to_csv('./data/fold/sample.csv', index=False)
-    df = df.sample(frac=1)
-    active_sample = df[15:]
-    train_sample = df[:15]
-    train_sample.to_csv('./data/fold/train.csv', index=False)
-    active_sample.to_csv('./data/fold/active.csv', index=False)
+def select_sample(step=1):
+    if step == 1:
+        df = pd.read_csv('./data/fold/sample.csv')
+        df = df.sample(frac=1)
+        active_sample = df[15:]
+        train_sample = df[:15]
+        train_sample.to_csv('./data/fold/train.csv', index=False)
+        active_sample.to_csv('./data/fold/active.csv', index=False)
+    else:
+        # active drop
+        df_active = pd.read_csv('./data/fold/active.csv')
+        print('len df_active:', len(df_active))
+        active_hard_sample = pd.read_csv('./data/fold/active_hard_sample.csv')
+        df_active = df_active[~df_active['info_id'].isin(active_hard_sample['info_id'].tolist())]
+        print('len df_active:', len(df_active))
+        # train merge
+        df_train = pd.read_csv('./data/fold/train.csv')
+        df_train = pd.concat([df_train, active_hard_sample])
+        print('len df_train:', len(df_train))
+        # save
+        df_train.to_csv('./data/fold/train.csv', index=False)
+        df_active.to_csv('./data/fold/active.csv', index=False)
 
 
 def extract_keywords(s):
@@ -98,6 +112,8 @@ def benchmark(clf, name, X_train, y_train, X_active, y_test, feature_names, clas
 
 # train classifier
 def train():
+    logging.basicConfig(filemode='w', filename="./logs/log.txt", level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s')
     # load data
     data_train = utils.Data()
     data_train.load_data('./data/fold/train.csv')
@@ -106,11 +122,11 @@ def train():
     logging.info('data loaded')
     print("%d categories" % len(data_train.target_names))
 
-    stopwords = load_stopwords()
+    stopwords = utils.load_stopwords()
 
     # text to vectorizer
     vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5, token_pattern=r"(?u)\b\w+\b",
-                                 ngram_range=(1,2), stop_words=stopwords, preprocessor=extract_keywords)
+                                 ngram_range=(1, 2), stop_words=stopwords, preprocessor=extract_keywords)
     # analyzer='char_wb',
     X_train = vectorizer.fit_transform(data_train.data)
     logging.info("finished train sample transform")
@@ -137,14 +153,41 @@ def train():
               data_train.class_name)
 
 
-# load stop words
-def load_stopwords():
-    stopwords = []
-    with codecs.open('./stopwords.txt', 'r', encoding='utf-8') as f:
-        for line in f.readlines():
-            # print(line.strip())
-            stopwords.append(line.strip())
-    return stopwords
+# extract hard sample from active csv
+def extract_hard_sample():
+    df = pd.read_csv('./data/fold/active.csv')
+    df_hard = pd.read_csv('./data/tmp/hard_sample.csv')
+    print(df_hard['index'])
+    hard = df.iloc[df_hard['index'].to_list()]
+    hard.to_csv('./data/tmp/active_hard_sample.csv', index_label='index')
+
+
+# query hard 15 sample
+def query_hard_sample():
+    df = pd.read_csv('./data/tmp/active.csv')
+    df = df.sort_values(by='prob', ascending=False)
+    df1 = pd.concat([df[:5], df[-10:]])
+    df1.to_csv('./data/tmp/hard_sample.csv', index_label='index')
+
+
+def predict_sample():
+    data_active = utils.Data()
+    data_active.load_data('./data/fold/active.csv')
+
+    active_pred = []
+
+    for i, item in enumerate(data_active.data):
+        p = predict.predict_label(item)
+        m = p.max()
+        index = p.argmax()
+        print(i, m, index)
+        active_pred.append({
+            'prob': m,
+            'class_name': data_active.class_name[index],
+            'category': data_active.target_names[i]
+        })
+    df = pd.DataFrame(active_pred)
+    df.to_csv('./data/tmp/active.csv', index=False)
 
 
 # classfier for news
@@ -170,9 +213,10 @@ def main():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filemode='w', filename="./logs/log.txt", level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s')
-    # select_sample()
-    train()
-    # process_data()
+    # select_sample(step=2)
+    # predict_sample()
+    # query_hard_sample()
+    # extract_hard_sample()
+    import jieba
+    # train()
     # main()

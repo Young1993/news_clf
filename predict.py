@@ -1,13 +1,8 @@
 from joblib import load
 from sklearn.feature_extraction.text import TfidfVectorizer
-import codecs
 import utils
 
-stopwords = []
-with codecs.open('./stopwords.txt', 'r', encoding='utf-8') as f:
-    for line in f.readlines():
-        # print(line.strip())
-        stopwords.append(line.strip())
+stopwords = utils.load_stopwords()
 
 # text to vectorizer
 vectorizer = TfidfVectorizer(sublinear_tf=True, max_df=0.5, token_pattern=r"(?u)\b\w+\b",
@@ -26,6 +21,6 @@ def predict_label(s):
     v = vectorizer.transform([s])
     # print(be.predict_proba(v))
     res = (be.predict_proba(v) +  mu.predict_proba(v) + co.predict_proba(v)) / 3
-    return res
+    return res[0]
 
 print(predict_label('“阅读让城市更有温度！”第二十一届深圳读书月盐田区活动启动'))
