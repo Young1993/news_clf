@@ -13,10 +13,12 @@ def load_stopwords():
     return stopwords
 
 def extract_keywords(s):
-    tags = jieba.analyse.extract_tags(s, topK=30, withWeight=True, allowPOS=())
+    # jieba.analyse.textrank
+    tags = jieba.analyse.extract_tags(s, topK=35, withWeight=True, allowPOS=(['n', 'v', 'nt', 'vn']))
     res = ''
     for item in tags:
         res += ' ' + item[0]
+    print(res)
     return res
 
 class Data():
@@ -29,7 +31,8 @@ class Data():
     def load_data(self, path):
         df = pd.read_csv(path) #, nrows=30
         for i in range(len(df)):
-            self.data.append(df['title'][i] + '  ' + df['content'][i])
+            tmp = extract_keywords(df['title'][i] + '  ' + df['content'][i])
+            self.data.append(tmp)
             self.target.append(self.class_name.index(df['category'][i]))
             self.target_names.append(df['category'][i])
         self.target = np.asarray(self.target)
