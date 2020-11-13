@@ -3,3 +3,5 @@
 /models
 __pycache__/
 /logs
+fold/
+.vector_cache/
