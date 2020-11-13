@@ -47,10 +47,10 @@ class Config(object):
         self.hidden_size = 128  # lstm隐藏层
         self.num_layers = 2  # lstm层数
 
-        self.batch_size = 16  # mini-batch 大小 128
-        self.n_vocab = 1000  # 12000 词表大小，在运行时赋值
-        self.data_path = './data/test/'  # './fold/'
-        self.print_step = 2  # 100
+        self.batch_size = 128  # mini-batch 大小 128
+        self.n_vocab = 15000  # 15000 词表大小，在运行时赋值
+        self.data_path = './data/fold/'  # './fold/'
+        self.print_step = 100  # 100
 
 
 '''Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification'''
