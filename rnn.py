@@ -49,7 +49,7 @@ class Config(object):
 
         self.batch_size = 128  # mini-batch 大小 128
         self.n_vocab = 15000  # 15000 词表大小，在运行时赋值
-        self.data_path = './data/fold/'  # './fold/'
+        self.data_path = './fold/'  # './fold/'
         self.print_step = 100  # 100
 
 
