@@ -216,7 +216,7 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
         log_dir=config.log_path + '/' + time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time())))
 
     for epoch in range(config.num_epochs):
-        print(f'---------------- Epoch: {epoch + 1:02} ----------')
+        print('---------------- Epoch: {%d + 1:02} ----------'.format(epoch))
         epoch_loss = 0
         train_steps = 0
         all_preds = np.array([], dtype=int)
