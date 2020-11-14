@@ -216,7 +216,7 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
         log_dir=config.log_path + '/' + time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(time.time())))
 
     for epoch in range(config.num_epochs):
-        print('---------------- Epoch: {%d + 1:02} ----------'.format(epoch))
+        print('---------------- Epoch: ' + str(epoch) + ' + 1:02 ----------')
         epoch_loss = 0
         train_steps = 0
         all_preds = np.array([], dtype=int)
@@ -290,4 +290,4 @@ print('finished training')
 val_loss, val_acc, val_report = evaluate(model, test_iterator, criterion, config)
 print("-------------- Test -------------")
 print('-' * 50)
-print("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(val_loss, val_acc, val_report ))
+print("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(val_loss, val_acc, val_report))
