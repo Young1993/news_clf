@@ -156,7 +156,9 @@ type = 'train'
 config = Config(embedding, type)
 logging.info('config:')
 logging.info(config)
-
+print('device:', config.device)
+logging.info('device:')
+logging.info(config.device)
 
 def tokenizer(s):
     return jieba.lcut(s)
@@ -179,9 +181,6 @@ def count_parameters(model):
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 
-print('device:', config.device)
-logging.info('device:')
-logging.info(config.device)
 print('model parameters: {}'.format(count_parameters(model)))
 logging.info('model parameters: {}'.format(count_parameters(model)))
 optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
