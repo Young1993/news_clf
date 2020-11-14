@@ -11,6 +11,7 @@ import torch.optim as optim
 from sklearn import metrics
 from tensorboardX import SummaryWriter
 import time
+import logging
 
 
 def classifiction_metric(preds, labels, label_list):
@@ -24,7 +25,7 @@ def classifiction_metric(preds, labels, label_list):
 class Config(object):
     """配置参数"""
 
-    def __init__(self, embedding):
+    def __init__(self, embedding, type):
         self.clip = 15
         self.model_name = 'rnn'
         self.class_list = ['教育', '财经', '时政', '科技', '社会']
@@ -47,10 +48,16 @@ class Config(object):
         self.hidden_size = 128  # lstm隐藏层
         self.num_layers = 2  # lstm层数
 
-        self.batch_size = 128  # mini-batch 大小 128
-        self.n_vocab = 15000  # 15000 词表大小，在运行时赋值
-        self.data_path = './fold/'  # './fold/'
-        self.print_step = 100  # 100
+        if type == 'test':
+            self.batch_size = 16  # mini-batch 大小 128
+            self.n_vocab = 1000  # 词表大小，在运行时赋值
+            self.data_path = './data/test/'
+            self.print_step = 2  # 100
+        else:
+            self.batch_size = 128  # mini-batch 大小 128
+            self.n_vocab = 15000  # 15000 词表大小，在运行时赋值
+            self.data_path = './fold/'  # './fold/'
+            self.print_step = 100  # 100
 
 
 '''Attention-Based Bidirectional Long Short-Term Memory Networks for Relation Classification'''
@@ -141,8 +148,14 @@ def load_news(config, text_field, band_field):
     return train_iter, val_iter, test_iter
 
 
+# start loggging
+logging.basicConfig(filemode='w', filename="./logs/log.txt", level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s')
 embedding = './data/sgns.sogou.word'
-config = Config(embedding)
+type = 'train'
+config = Config(embedding, type)
+logging.info('config:')
+logging.info(config)
 
 
 def tokenizer(s):
@@ -167,8 +180,10 @@ word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 
 print('device:', config.device)
+logging.info('device:')
+logging.info(config.device)
 print('model parameters: {}'.format(count_parameters(model)))
-
+logging.info('model parameters: {}'.format(count_parameters(model)))
 optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
 
@@ -218,6 +233,7 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
 
     for epoch in range(config.num_epochs):
         print('---------------- Epoch: ' + str(epoch) + ' + 1:02 ----------')
+        logging.info('---------------- Epoch: ' + str(epoch) + ' ----------')
         epoch_loss = 0
         train_steps = 0
         all_preds = np.array([], dtype=int)
@@ -261,6 +277,11 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
                 writer.add_scalar("acc/train", train_acc, c)
                 writer.add_scalar("acc/val", val_acc, c)
 
+                logging.info("loss/train: %0.3f, %d" % (train_loss, c))
+                logging.info("loss/val: %0.3f, %d" % (val_loss, c))
+                logging.info("acc/train: %0.3f, %d" % (train_acc, c))
+                logging.info("acc/val: %0.3f, %d" % (val_acc, c))
+
                 for label in config.class_list:
                     writer.add_scalar(label + ":f1/train", train_report[label]['f1-score'], c)
                     writer.add_scalar(label + ":f1/dev", val_report[label]['f1-score'], c)
@@ -270,8 +291,12 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
                 writer.add_scalar("macro avg:f1/train", train_report['macro avg']['f1-score'], c)
                 writer.add_scalar("macro avg:f1/dev", val_report['macro avg']['f1-score'], c)
 
+                logging.info("macro avg:f1/train: %0.3f, %d " % (train_report['macro avg']['f1-score'], c))
+                logging.info("macro avg:f1/dev %0.3f, %d " % (val_report['macro avg']['f1-score'], c))
+
                 if val_report['macro avg']['f1-score'] > f_score:
                     f_score = val_report['macro avg']['f1-score']
+                    logging.info('best macro avg: %0.3f ' % f_score)
                     torch.save({'epoch': epoch,
                                 'model_state_dict': model.state_dict(),
                                 'optimizer_state_dict': optimizer.state_dict(),
@@ -287,8 +312,10 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
 train(model, train_iterator, val_iterator, optimizer, criterion, config)
 
 print('finished training')
-
+logging.info('finished training')
 val_loss, val_acc, val_report = evaluate(model, test_iterator, criterion, config)
 print("-------------- Test -------------")
+logging.info("-------------- Test -------------")
 print('-' * 50)
 print("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(val_loss, val_acc, val_report))
+logging.info("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(val_loss, val_acc, val_report))
