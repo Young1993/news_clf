@@ -166,6 +166,7 @@ def count_parameters(model):
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 
+print('device:', config.device)
 print('model parameters: {}'.format(count_parameters(model)))
 
 optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
