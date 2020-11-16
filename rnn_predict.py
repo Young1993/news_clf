@@ -142,18 +142,20 @@ train_iterator, val_iterator, test_iterator = load_news(config, text_field, band
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 model = model.to(config.device)
-dict = torch.load(config.save_path) # map_location=torch.device('cpu')
-model.load_state_dict(dict['model_state_dict'])
+if config.device == 'cuda':
+    dict = torch.load(config.save_path)
+else:
+    dict = torch.load(config.save_path)
+model.load_state_dict(dict['model_state_dict'], map_location=torch.device('cpu'))
 model.eval()
 
-try:
-    df = pd.read_csv('./data/fold/sample.csv', nrows=10)
-except:
+if config.device == 'cuda':
     df = pd.read_csv('./data/sample.csv', nrows=10)
+else:
+    df = pd.read_csv('./data/fold/sample.csv', nrows=10)
 
 class News():
     def __init__(self, s):
@@ -165,5 +167,5 @@ for i in range(len(df)):
         input_doc) < config.pad_size else input_doc[:config.pad_size]
     indexed = [text_field.vocab.stoi[t] for t in input_doc]
     with torch.no_grad():
-        res = model(News(torch.tensor(indexed).to(config.device)))
+        res = model(News(torch.tensor(indexed).to(config.device)).text)
         print(res.detach().cpu().numpy()[0])
