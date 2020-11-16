@@ -178,7 +178,7 @@ for i in range(len(df)):
             res = model(News(torch.tensor(indexed).to(config.device)).text)
             print(res.detach().cpu().numpy()[0])
             resp = res.detach().cpu().numpy()[0]
-            index = np.argmax(resp, axis=1)
+            index = np.argmax(resp)
             if index == 2:
                 df['predict'][i] = '要闻'
             else:
