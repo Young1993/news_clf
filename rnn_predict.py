@@ -145,11 +145,11 @@ def count_parameters(model):
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 model = model.to(config.device)
+dict = torch.load(config.save_path)
 if config.device == 'cuda':
-    dict = torch.load(config.save_path)
+    model.load_state_dict(dict['model_state_dict'])
 else:
-    dict = torch.load(config.save_path)
-model.load_state_dict(dict['model_state_dict'], map_location=torch.device('cpu'))
+    model.load_state_dict(dict['model_state_dict'], map_location=torch.device('cpu'))
 model.eval()
 
 if config.device == 'cuda':
