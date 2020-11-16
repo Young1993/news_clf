@@ -150,7 +150,10 @@ dict = torch.load(config.save_path) # map_location=torch.device('cpu')
 model.load_state_dict(dict['model_state_dict'])
 model.eval()
 
-df = pd.read_csv('./data/fold/sample.csv', nrows=10)
+try:
+    df = pd.read_csv('./data/fold/sample.csv', nrows=10)
+except:
+    df = pd.read_csv('./data/sample.csv', nrows=10)
 
 class News():
     def __init__(self, s):
