@@ -154,7 +154,7 @@ else:
 model.eval()
 
 if torch.cuda.is_available():
-    df = pd.read_csv('./data/sample.csv', nrows=20)
+    df = pd.read_csv('./data/sample.csv')
 else:
     df = pd.read_csv('./data/fold/sample.csv', nrows=20)
 
