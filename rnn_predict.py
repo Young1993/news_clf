@@ -146,13 +146,13 @@ word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 model = model.to(config.device)
 dict = torch.load(config.save_path)
-if config.device == 'cuda':
+if torch.cuda.is_available():
     model.load_state_dict(dict['model_state_dict'])
 else:
     model.load_state_dict(dict['model_state_dict'], map_location=torch.device('cpu'))
 model.eval()
 
-if config.device == 'cuda':
+if torch.cuda.is_available():
     df = pd.read_csv('./data/sample.csv', nrows=10)
 else:
     df = pd.read_csv('./data/fold/sample.csv', nrows=10)
