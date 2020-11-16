@@ -299,7 +299,7 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
                     torch.save({'epoch': epoch,
                                 'model_state_dict': model.state_dict(),
                                 'optimizer_state_dict': optimizer.state_dict(),
-                                'loss': f_score},
+                                'f_score': f_score},
                                config.save_path)
 
                 model.train()
