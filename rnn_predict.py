@@ -142,6 +142,7 @@ train_iterator, val_iterator, test_iterator = load_news(config, text_field, band
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 model = model.to(config.device)
@@ -153,19 +154,33 @@ else:
 model.eval()
 
 if torch.cuda.is_available():
-    df = pd.read_csv('./data/sample.csv', nrows=10)
+    df = pd.read_csv('./data/sample.csv', nrows=20)
 else:
-    df = pd.read_csv('./data/fold/sample.csv', nrows=10)
+    df = pd.read_csv('./data/fold/sample.csv', nrows=20)
+
+df['predict'] = None
+
 
 class News():
     def __init__(self, s):
         self.text = (s.unsqueeze(1), torch.tensor([len(s)]).to(config.device))
 
+
 for i in range(len(df)):
-    input_doc = tokenizer(df['title'][i] + df['content'][i])
-    input_doc = input_doc + ['[pad]'] * (config.pad_size - len(input_doc)) if len(
-        input_doc) < config.pad_size else input_doc[:config.pad_size]
-    indexed = [text_field.vocab.stoi[t] for t in input_doc]
-    with torch.no_grad():
-        res = model(News(torch.tensor(indexed).to(config.device)).text)
-        print(res.detach().cpu().numpy()[0])
+    if df['category'][i] == '健康':
+        continue
+    else:
+        input_doc = tokenizer(df['title'][i] + df['content'][i])
+        input_doc = input_doc + ['[pad]'] * (config.pad_size - len(input_doc)) if len(
+            input_doc) < config.pad_size else input_doc[:config.pad_size]
+        indexed = [text_field.vocab.stoi[t] for t in input_doc]
+        with torch.no_grad():
+            res = model(News(torch.tensor(indexed).to(config.device)).text)
+            print(res.detach().cpu().numpy()[0])
+            resp = res.detach().cpu().numpy()[0]
+            index = np.argmax(resp, axis=1)
+            if index == 2:
+                df['predict'][i] = '要闻'
+            else:
+                df['predict'][i] = config.class_list[index]
+df.to_csv('predict.csv', index=False)
