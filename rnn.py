@@ -28,7 +28,7 @@ class Config(object):
     def __init__(self, embedding, type):
         self.clip = 15
         self.model_name = 'rnn'
-        self.class_list = ['教育', '财经', '时政', '科技', '社会']
+        self.class_list = ['教育', '财经', '要闻', '科技', '社会', '健康']
         # self.vocab_path = dataset + '/data/vocab.pkl'                                # 词表
         self.save_path = './models/' + self.model_name + '.pt'  # 模型训练结果
         self.log_path = './logs/' + self.model_name
