@@ -160,6 +160,7 @@ print('device:', config.device)
 logging.info('device:')
 logging.info(config.device)
 
+
 def tokenizer(s):
     return jieba.lcut(s)
 
@@ -287,15 +288,15 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
                     print(label + ":f1/train", train_report[label]['f1-score'], c)
                     print(label + ":f1/dev", val_report[label]['f1-score'], c)
 
-                writer.add_scalar("macro avg:f1/train", train_report['macro avg']['f1-score'], c)
-                writer.add_scalar("macro avg:f1/dev", val_report['macro avg']['f1-score'], c)
+                writer.add_scalar("weighted avg:f1/train", train_report['weighted avg']['f1-score'], c)
+                writer.add_scalar("weighted avg:f1/dev", val_report['weighted avg']['f1-score'], c)
 
-                logging.info("macro avg:f1/train: %0.3f, %d " % (train_report['macro avg']['f1-score'], c))
-                logging.info("macro avg:f1/dev %0.3f, %d " % (val_report['macro avg']['f1-score'], c))
+                logging.info("weighted avg:f1/train: %0.3f, %d " % (train_report['weighted avg']['f1-score'], c))
+                logging.info("weighted avg:f1/dev %0.3f, %d " % (val_report['weighted avg']['f1-score'], c))
 
-                if val_report['macro avg']['f1-score'] > f_score:
-                    f_score = val_report['macro avg']['f1-score']
-                    logging.info('best macro avg: %0.3f ' % f_score)
+                if val_report['weighted avg']['f1-score'] > f_score:
+                    f_score = val_report['weighted avg']['f1-score']
+                    logging.info('best weighted avg: %0.3f ' % f_score)
                     torch.save({'epoch': epoch,
                                 'model_state_dict': model.state_dict(),
                                 'optimizer_state_dict': optimizer.state_dict(),
