@@ -3,7 +3,7 @@ import os
 import re
 import codecs
 import jieba
-
+import json
 
 # 教育 41936
 # 财经 37098
@@ -96,6 +96,22 @@ def process():
     df1 = pd.DataFrame(arr)
     df1.to_csv('./fold/train.csv', index=False)
 
+def labeled_data():
+    d = []
+    re_comment = re.compile('<!--[^>]*-->')
+    re_html = re.compile('<[^>]*>')
+    with codecs.open('./data/tmp/评测数据', 'r', encoding='utf-8') as f:
+        for line in f.readlines():
+            line = json.loads(line)
+            line['content'] = line['content'].replace('> 下需要用 p 标签分段，不能直接就放文字或图片标签 -->', '')
+            line['content'] = re_comment.sub('', line['content'])
+            line['content'] = re_html.sub('', line['content'])
+            d.append({
+                'title': line['title'],
+                'content': line['content'].strip()
+            })
+    df = pd.DataFrame(d)
+    df.to_csv('./data/sample.csv', index=False)
 
 def statistics():
     df = pd.read_csv('./data/news/data.csv')
@@ -120,7 +136,8 @@ if __name__ == '__main__':
     # replace_label()
     # statistics()
     # split_data()
-    process()
+    # process()
+    labeled_data()
     # df = pd.read_csv('./data/train/train.csv')
     # # print(df.iloc[37980])
     # for i in range(len(df)):

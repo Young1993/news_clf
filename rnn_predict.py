@@ -15,7 +15,7 @@ class Config(object):
     def __init__(self, embedding, type):
         self.clip = 15
         self.model_name = 'rnn'
-        self.class_list = ['教育', '财经', '时政', '科技', '社会']
+        self.class_list = ['教育', '财经', '要闻', '科技', '社会', '健康']
         # self.vocab_path = dataset + '/data/vocab.pkl'                                # 词表
         self.save_path = './models/' + self.model_name + '.pt'  # 模型训练结果
         self.log_path = './logs/' + self.model_name
@@ -167,20 +167,20 @@ class News():
 
 
 for i in range(len(df)):
-    if df['category'][i] == '健康':
-        continue
-    else:
-        input_doc = tokenizer(df['title'][i] + df['content'][i])
-        input_doc = input_doc + ['[pad]'] * (config.pad_size - len(input_doc)) if len(
-            input_doc) < config.pad_size else input_doc[:config.pad_size]
-        indexed = [text_field.vocab.stoi[t] for t in input_doc]
-        with torch.no_grad():
-            res = model(News(torch.tensor(indexed).to(config.device)).text)
-            print(res.detach().cpu().numpy()[0])
-            resp = res.detach().cpu().numpy()[0]
-            index = np.argmax(resp)
-            if index == 2:
-                df['predict'][i] = '要闻'
-            else:
-                df['predict'][i] = config.class_list[index]
+    # if df['category'][i] == '健康':
+    #     continue
+    # else:
+    input_doc = tokenizer(df['title'][i] + df['content'][i])
+    input_doc = input_doc + ['[pad]'] * (config.pad_size - len(input_doc)) if len(
+        input_doc) < config.pad_size else input_doc[:config.pad_size]
+    indexed = [text_field.vocab.stoi[t] for t in input_doc]
+    with torch.no_grad():
+        res = model(News(torch.tensor(indexed).to(config.device)).text)
+        print(res.detach().cpu().numpy()[0])
+        resp = res.detach().cpu().numpy()[0]
+        index = np.argmax(resp)
+        # if index == 2:
+        #     df['predict'][i] = '要闻'
+        # else:
+        df['predict'][i] = config.class_list[index]
 df.to_csv('predict.csv', index=False)
