@@ -1,4 +1,6 @@
 import pandas as pd
+import jieba
+
 
 # df = pd.read_csv('./data/tmp/diff.csv')
 # df =df.sample(frac=0.1)
@@ -36,9 +38,22 @@ import pandas as pd
 # df_health = df_active[df_active['category'] == '健康']
 # df_health.to_csv('./data/fold/health_to_confirm.csv', index=False)
 
-df_active = pd.read_csv('./data/fold/health_confirm.csv', usecols=['title', 'content', 'category'])
-df_train = pd.read_csv('./data/fold/train.csv', usecols=['title', 'content', 'category'])
-df = pd.concat([df_active, df_train])
-df = df.rename(columns={'category':'label'})
-df = df[['title','content','label']]
-df.to_csv('./data/news/health.csv', index=False)
+# df_active = pd.read_csv('./data/fold/health_confirm.csv', usecols=['title', 'content', 'category'])
+# df_train = pd.read_csv('./data/fold/train.csv', usecols=['title', 'content', 'category'])
+# df = pd.concat([df_active, df_train])
+# df = df.rename(columns={'category':'label'})
+# df = df[['title','content','label']]
+# df.to_csv('./data/news/health.csv', index=False)
+
+def tokenizer(s):
+    return jieba.lcut(s)
+
+
+df = pd.read_csv('./data/sample.csv')
+for i in range(len(df)):
+    try:
+        t = df['title'][i] if type(df['title'][i]) == str else ''
+        c = df['content'][i] if type(df['content'][i]) == str else ''
+        input_doc = tokenizer(t + c)
+    except:
+        print(i, df['title'][i], df['content'][i])
