@@ -152,7 +152,9 @@ def load_news(config, text_field, band_field):
 logging.basicConfig(filemode='w', filename="./logs/log.txt", level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s')
 embedding = './data/sgns.sogou.word'
+
 type = 'train'
+
 config = Config(embedding, type)
 logging.info('config:')
 logging.info(config)

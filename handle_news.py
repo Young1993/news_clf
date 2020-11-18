@@ -36,7 +36,7 @@ def handle_text():
     df = pd.DataFrame(news_list)
     df.to_csv('./data/news/tech.csv', index=False)
 
-
+# 合并原始数据
 def merge_data():
     # merge data
     path = './data/news/'
@@ -44,19 +44,20 @@ def merge_data():
     arr = []
     for block in files:
         # print(block)
-        df = pd.read_csv(path + block)
-        if len(df) < 10000:
-            arr.append(df)
-        else:
-            arr.append(df.sample(n=10000, random_state=1423, axis=0))
+        if re.search('.csv', block):
+            df = pd.read_csv(path + block)
+            if len(df) < 10000:
+                arr.append(df)
+            else:
+                arr.append(df.sample(n=10000, random_state=1423, axis=0))
 
     df1 = pd.concat(arr, ignore_index=True, sort=False)
-    df1.to_csv('./data/news/raw.csv', index=False)
+    df1.to_csv('./data/raw.csv', index=False)
 
-
+# 分割数据
 def split_data():
-    df = pd.read_csv('./data/news/data.csv')
-    # print(df.head())
+    df = pd.read_csv('./data/data.csv')
+    print(df.head())
     # print(len(df))
     df = df.sample(frac=1)
     split_1 = int(0.8 * len(df))
@@ -72,20 +73,20 @@ def split_data():
 def replace_name(name):
     return name if name != '时政' else '要闻'
 
-
+# 替换名称
 def replace_label():
-    df = pd.read_csv('./data/news/raw.csv')
+    df = pd.read_csv('./data/raw.csv')
 
     df['label'] = df['label'].apply(replace_name)
-    df.to_csv('./data/news/data.csv', index=False)
+    df.to_csv('./data/data.csv', index=False)
 
 
 def process():
     class_name = ['教育', '财经', '要闻', '科技', '社会', '健康']
-    df = pd.read_csv('./data/train/train.csv')
+    df = pd.read_csv('./data/train/test.csv')
     arr = []
     for i in range(len(df)):
-        s = handle(df['title'][i]) + '' + handle(df['content'][i])
+        s = handle(df['title'][i]) + ' Φ ' + handle(df['content'][i])
         tmp = jieba.lcut(s)
         tmp = tmp[:512]
         tmp = ''.join(tmp)
@@ -94,7 +95,7 @@ def process():
             'label': class_name.index(df['label'][i])
         })
     df1 = pd.DataFrame(arr)
-    df1.to_csv('./fold/train.csv', index=False)
+    df1.to_csv('./fold/test.csv', index=False)
 
 def labeled_data():
     d = []
@@ -114,7 +115,8 @@ def labeled_data():
     df.to_csv('./data/sample.csv', index=False)
 
 def statistics():
-    df = pd.read_csv('./data/news/data.csv')
+    df = pd.read_csv('./data/data.csv')
+    print(df.info())
     print(df.groupby('label'))
     for g in df.groupby('label'):
         print(g)
@@ -136,8 +138,8 @@ if __name__ == '__main__':
     # replace_label()
     # statistics()
     # split_data()
-    # process()
-    labeled_data()
+    process()
+    # labeled_data()
     # df = pd.read_csv('./data/train/train.csv')
     # # print(df.iloc[37980])
     # for i in range(len(df)):
