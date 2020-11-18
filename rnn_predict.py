@@ -170,9 +170,9 @@ for i in range(len(df)):
     # if df['category'][i] == '健康':
     #     continue
     # else:
-    t = df['title'][i] if type(df['title'][i]) == str else ''
+    tmp = df['title'][i] if type(df['title'][i]) == str else ''
     c = df['content'][i] if type(df['content'][i]) == str else ''
-    input_doc = tokenizer(t + c)
+    input_doc = tokenizer(tmp + c)
     input_doc = input_doc + ['[pad]'] * (config.pad_size - len(input_doc)) if len(
         input_doc) < config.pad_size else input_doc[:config.pad_size]
     indexed = [text_field.vocab.stoi[t] for t in input_doc]

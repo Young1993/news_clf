@@ -57,3 +57,8 @@ for i in range(len(df)):
         input_doc = tokenizer(t + c)
     except:
         print(i, df['title'][i], df['content'][i])
+
+for i in range(len(df)):
+    t = df['title'][i] if type(df['title'][i]) == str else ''
+    c = df['content'][i] if type(df['content'][i]) == str else ''
+    print(i)
