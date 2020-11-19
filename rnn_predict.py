@@ -172,7 +172,7 @@ for i in range(len(df)):
     # else:
     tmp = str(df['title'][i]) # if type(df['title'][i])
     c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
-    input_doc = tokenizer(tmp + 'Φ' +c)
+    input_doc = tokenizer(tmp + c)
     input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
         input_doc) < config.pad_size else input_doc[:config.pad_size]
     indexed = [text_field.vocab.stoi[t] for t in input_doc]

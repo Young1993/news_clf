@@ -86,7 +86,7 @@ def process():
     df = pd.read_csv('./data/train/test.csv')
     arr = []
     for i in range(len(df)):
-        s = handle(df['title'][i]) + ' Φ ' + handle(df['content'][i])
+        s = handle(df['title'][i]) + handle(df['content'][i])
         tmp = jieba.lcut(s)
         tmp = tmp[:512]
         tmp = ''.join(tmp)
@@ -125,7 +125,7 @@ def statistics():
 def handle(s):
     try:
         if type(s) == str:
-            return s.strip().replace('\u3000', '').replace('\n', '')
+            return s.strip().replace(' ', '').replace('\u3000', '').replace('\n', '')
         else:
             return ''
     except:

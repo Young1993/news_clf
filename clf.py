@@ -191,9 +191,9 @@ def main():
     news_list = []
     re_comment = re.compile('<!--[^>]*-->')
     re_html = re.compile('<[^>]*>')
-    for o in ['样本-健康', '样本-教育', '样本-社会', '样本-科技', '样本-要闻']:
+    for o in ['健康', '教育', '社会', '科技', '要闻']:
         print(o)
-        with codecs.open('./data/' + o, 'r', encoding='utf-8') as f:
+        with codecs.open('./data/test/样本/' + o, 'r', encoding='utf-8') as f:
             for i, line in enumerate(f.readlines()):
                 try:
                     line = json.loads(line)
@@ -205,12 +205,12 @@ def main():
                 except:
                     continue
     df = pd.DataFrame(news_list)
-    df.to_csv('./data/fold/data.csv', index=False)
+    df.to_csv('./data/tmp/data.csv', index=False)
 
 
 if __name__ == '__main__':
     step = 17
-    procedure = 'select_sample'
+    procedure = 'main'
 
     if procedure == 'train':
         train(step)
