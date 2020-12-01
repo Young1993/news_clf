@@ -146,19 +146,20 @@ def count_parameters(model):
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 model = model.to(config.device)
-dict = torch.load(config.save_path)
-if torch.cuda.is_available():
-    model.load_state_dict(dict['model_state_dict'])
-else:
-    model.load_state_dict(dict['model_state_dict'], map_location=torch.device('cpu'))
+dict = torch.load(config.save_path, map_location=config.device)
+model.load_state_dict(dict['model_state_dict'])
+# if torch.cuda.is_available():
+#     model.load_state_dict(dict['model_state_dict'])
+# else:
+#     model.load_state_dict(dict['model_state_dict'])
 model.eval()
 
-if torch.cuda.is_available():
-    df = pd.read_csv('./data/sample.csv')
-else:
-    df = pd.read_csv('./data/fold/sample.csv', nrows=20)
-
-df['predict'] = None
+# if torch.cuda.is_available():
+#     df = pd.read_csv('./data/sample.csv')
+# else:
+#     df = pd.read_csv('./data/fold/sample.csv', nrows=20)
+#
+# df['predict'] = None
 
 
 class News():
@@ -166,23 +167,33 @@ class News():
         self.text = (s.unsqueeze(1), torch.tensor([len(s)]).to(config.device))
 
 
-for i in range(len(df)):
-    # if df['category'][i] == '健康':
-    #     continue
-    # else:
-    tmp = str(df['title'][i]) # if type(df['title'][i])
-    c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
-    input_doc = tokenizer(tmp + c)
+def predict_label(t, c):
+    input_doc = tokenizer(t + c)
     input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
         input_doc) < config.pad_size else input_doc[:config.pad_size]
     indexed = [text_field.vocab.stoi[t] for t in input_doc]
     with torch.no_grad():
         res = model(News(torch.tensor(indexed).to(config.device)).text)
-        print(res.detach().cpu().numpy()[0])
+        # print(res.detach().cpu().numpy()[0])
         resp = res.detach().cpu().numpy()[0]
         index = np.argmax(resp)
-        # if index == 2:
-        #     df['predict'][i] = '要闻'
-        # else:
-        df['predict'][i] = config.class_list[index]
-df.to_csv('predict.csv', index=False)
+        print('label:', config.class_list[index])
+        return config.class_list[index]
+
+# for i in range(len(df)):
+#     tmp = str(df['title'][i]) # if type(df['title'][i])
+#     c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
+#     input_doc = tokenizer(tmp + c)
+#     input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
+#         input_doc) < config.pad_size else input_doc[:config.pad_size]
+#     indexed = [text_field.vocab.stoi[t] for t in input_doc]
+#     with torch.no_grad():
+#         res = model(News(torch.tensor(indexed).to(config.device)).text)
+#         print(res.detach().cpu().numpy()[0])
+#         resp = res.detach().cpu().numpy()[0]
+#         index = np.argmax(resp)
+#         # if index == 2:
+#         #     df['predict'][i] = '要闻'
+#         # else:
+#         df['predict'][i] = config.class_list[index]
+# df.to_csv('predict.csv', index=False)

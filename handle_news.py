@@ -115,7 +115,7 @@ def labeled_data():
     df.to_csv('./data/sample.csv', index=False)
 
 def statistics():
-    df = pd.read_csv('./data/data.csv')
+    df = pd.read_csv('./fold/train.csv')
     print(df.info())
     print(df.groupby('label'))
     for g in df.groupby('label'):
@@ -136,9 +136,9 @@ def handle(s):
 if __name__ == '__main__':
     # merge_data()
     # replace_label()
-    # statistics()
+    statistics()
     # split_data()
-    process()
+    # process()
     # labeled_data()
     # df = pd.read_csv('./data/train/train.csv')
     # # print(df.iloc[37980])

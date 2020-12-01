@@ -49,16 +49,25 @@ def tokenizer(s):
     return jieba.lcut(s)
 
 
-df = pd.read_csv('./data/sample.csv')
-for i in range(len(df)):
-    try:
-        t = df['title'][i] if type(df['title'][i]) == str else ''
-        c = df['content'][i] if type(df['content'][i]) == str else ''
-        input_doc = tokenizer(t + c)
-    except:
-        print(i, df['title'][i], df['content'][i])
+# df = pd.read_csv('./data/sample.csv')
+# for i in range(len(df)):
+#     try:
+#         t = df['title'][i] if type(df['title'][i]) == str else ''
+#         c = df['content'][i] if type(df['content'][i]) == str else ''
+#         input_doc = tokenizer(t + c)
+#     except:
+#         print(i, df['title'][i], df['content'][i])
+#
+# for i in range(len(df)):
+#     t = df['title'][i] if type(df['title'][i]) == str else ''
+#     c = df['content'][i] if type(df['content'][i]) == str else ''
+#     print(i)
 
-for i in range(len(df)):
-    t = df['title'][i] if type(df['title'][i]) == str else ''
-    c = df['content'][i] if type(df['content'][i]) == str else ''
-    print(i)
+df = pd.read_csv('./predict.csv')
+df1 = df[:200]
+df2 = df[1000: 1200]
+df3 = df[2000: 2200]
+df4 = df[3000: 3200]
+df5 = df[4000: 4200]
+df6 = pd.concat([df1,df2,df3,df4,df5], ignore_index=True, sort=False)
+df6.to_csv('./sample_predict.csv', index=False)

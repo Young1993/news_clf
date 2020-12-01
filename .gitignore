@@ -6,3 +6,4 @@ __pycache__/
 fold/
 .vector_cache/
 *.zip
+tmp/

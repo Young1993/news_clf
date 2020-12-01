@@ -308,6 +308,7 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
                 model.train()
         scheduler.step()
         print('Epoch {}, lr {}'.format(epoch, optimizer.param_groups[0]['lr']))
+        logging.info('Epoch {}, lr {}'.format(epoch, optimizer.param_groups[0]['lr']))
 
 
 # start training
