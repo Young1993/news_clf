@@ -6,16 +6,16 @@ import math
 from torchtext import data
 from torchtext import vocab
 import jieba
-import pandas as pd
+# import pandas as pd
 
 
 class Config(object):
     """配置参数"""
 
     def __init__(self, embedding, type):
-        self.clip = 15
+        self.clip = 10
         self.model_name = 'rnn'
-        self.class_list = ['教育', '财经', '时政', '科技', '社会', '健康']
+        self.class_list = ['教育', '财经', '时政', '科技', '社会', '健康', '其他']
         # self.vocab_path = dataset + '/data/vocab.pkl'                                # 词表
         self.save_path = './models/' + self.model_name + '.pt'  # 模型训练结果
         self.log_path = './logs/' + self.model_name
@@ -24,7 +24,6 @@ class Config(object):
         self.embed = 300
         # 预训练词向量
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
-
         self.dropout = 0.3  # 随机失活
         self.require_improvement = 1000  # 若超过 1000 batch效果还没提升，则提前结束训练
         self.num_classes = len(self.class_list)  # 类别数
@@ -149,6 +148,31 @@ model = model.to(config.device)
 dict = torch.load(config.save_path, map_location=config.device)
 model.load_state_dict(dict['model_state_dict'])
 model.eval()
+
+from sklearn import metrics
+def classifiction_metric(preds, labels, label_list):
+    acc = metrics.accuracy_score(labels, preds)
+    labels_list = [i for i in range(len(label_list))]
+    report = metrics.classification_report(
+        labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
+    return acc, report
+def evaluation(model, iterator, config):
+    model.eval()
+    all_preds = np.array([], dtype=int)
+    all_labels = np.array([], dtype=int)
+    with torch.no_grad():
+        for batch in iterator:
+            logits = model(batch.text)
+            label = batch.label.detach().cpu().numpy()
+            preds = logits.detach().cpu().numpy()
+            preds = np.argmax(preds, axis=1)
+            all_preds = np.append(all_preds, preds)
+            all_labels = np.append(all_labels, label)
+    return classifiction_metric(all_preds, all_labels, config.class_list)
+
+# evaluation
+test_loss, test_acc, test_report = evaluation(model, test_iterator, config)
+print(test_loss, test_acc, test_report)
 
 class News():
     def __init__(self, s):
