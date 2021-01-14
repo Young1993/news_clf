@@ -329,6 +329,6 @@ def evaluation(model, iterator, config):
 # evaluation
 logging.info("-------------- Test -------------")
 
-test_loss, test_acc, test_report = evaluation(model, test_iterator, config)
+test_acc, test_report = evaluation(model, test_iterator, config)
 logging.info('-' * 50)
-logging.info("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(test_loss, test_acc, test_report))
+logging.info("\t test acc: {}, \t test report: {}".format(test_acc, test_report))

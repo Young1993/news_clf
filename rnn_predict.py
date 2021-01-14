@@ -171,8 +171,8 @@ def evaluation(model, iterator, config):
     return classifiction_metric(all_preds, all_labels, config.class_list)
 
 # evaluation
-test_loss, test_acc, test_report = evaluation(model, test_iterator, config)
-print(test_loss, test_acc, test_report)
+test_acc, test_report = evaluation(model, test_iterator, config)
+print(test_acc, test_report)
 
 class News():
     def __init__(self, s):
