@@ -26,9 +26,9 @@ class Config(object):
     """配置参数"""
 
     def __init__(self, embedding, type):
-        self.clip = 15
+        self.clip = 10
         self.model_name = 'rnn'
-        self.class_list = ['教育', '财经', '要闻', '科技', '社会', '健康']
+        self.class_list = ['教育', '财经', '时政', '科技', '社会', '健康', '其他']
         # self.vocab_path = dataset + '/data/vocab.pkl'                                # 词表
         self.save_path = './models/' + self.model_name + '.pt'  # 模型训练结果
         self.log_path = './logs/' + self.model_name
@@ -37,7 +37,6 @@ class Config(object):
         self.embed = 300
         # 预训练词向量
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # 设备
-
         self.dropout = 0.3  # 随机失活
         self.require_improvement = 1000  # 若超过 1000 batch效果还没提升，则提前结束训练
         self.num_classes = len(self.class_list)  # 类别数
@@ -156,11 +155,8 @@ embedding = './data/sgns.sogou.word'
 type = 'train'
 
 config = Config(embedding, type)
-logging.info('config:')
-logging.info(config)
-print('device:', config.device)
-logging.info('device:')
-logging.info(config.device)
+logging.info('config:{}'.format(config))
+logging.info('device:{}'.format(config.device))
 
 
 def tokenizer(s):
@@ -184,7 +180,6 @@ def count_parameters(model):
 word_emb = text_field.vocab.vectors
 model = News_clf(config, word_emb)
 
-print('model parameters: {}'.format(count_parameters(model)))
 logging.info('model parameters: {}'.format(count_parameters(model)))
 optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
@@ -205,8 +200,8 @@ def evaluate(model, iterator, criterion, config):
     model.eval()
     epoch_loss = 0
 
-    all_preds = np.array([], dtype=int)
-    all_labels = np.array([], dtype=int)
+    # all_preds = np.array([], dtype=int)
+    # all_labels = np.array([], dtype=int)
 
     with torch.no_grad():
         for batch in iterator:
@@ -214,20 +209,21 @@ def evaluate(model, iterator, criterion, config):
             loss = criterion(logits.view(-1, config.num_classes), batch.label)
             epoch_loss += loss.item()
 
-            label = batch.label.detach().cpu().numpy()
-            preds = logits.detach().cpu().numpy()
-            preds = np.argmax(preds, axis=1)
-            all_preds = np.append(all_preds, preds)
-            all_labels = np.append(all_labels, label)
+            # label = batch.label.detach().cpu().numpy()
+            # preds = logits.detach().cpu().numpy()
+            # preds = np.argmax(preds, axis=1)
+            # all_preds = np.append(all_preds, preds)
+            # all_labels = np.append(all_labels, label)
 
-    acc, report = classifiction_metric(all_preds, all_labels, config.class_list)
+    # acc, report = classifiction_metric(all_preds, all_labels, config.class_list)
 
-    return epoch_loss / len(iterator), acc, report
+    return epoch_loss / len(iterator)  # , acc, report
 
 
 def train(model, train_iterator, val_iterator, optimizer, criterion, config):
     model.train()
-    f_score = float('-inf')
+
+    best_loss = float('inf')
     global_step = 0
 
     writer = SummaryWriter(
@@ -238,8 +234,8 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
         logging.info('---------------- Epoch: ' + str(epoch) + ' ----------')
         epoch_loss = 0
         train_steps = 0
-        all_preds = np.array([], dtype=int)
-        all_labels = np.array([], dtype=int)
+        # all_preds = np.array([], dtype=int)
+        # all_labels = np.array([], dtype=int)
 
         for step, batch in enumerate(train_iterator):
             optimizer.zero_grad()
@@ -257,68 +253,82 @@ def train(model, train_iterator, val_iterator, optimizer, criterion, config):
             global_step += 1
             train_steps += 1
 
-            label = batch.label.detach().cpu().numpy()
-            preds = logits.detach().cpu().numpy()
-
-            preds = np.argmax(preds, axis=1)
-            all_preds = np.append(all_preds, preds)
-            all_labels = np.append(all_labels, label)
+            # label = batch.label.detach().cpu().numpy()
+            # preds = logits.detach().cpu().numpy()
+            #
+            # preds = np.argmax(preds, axis=1)
+            # all_preds = np.append(all_preds, preds)
+            # all_labels = np.append(all_labels, label)
 
             if global_step % config.print_step == 0:
                 train_loss = epoch_loss / train_steps
                 # 指标比较
-                train_acc, train_report = classifiction_metric(all_preds, all_labels, config.class_list)
+                # train_acc, train_report = classifiction_metric(all_preds, all_labels, config.class_list)
+                # val_loss, val_acc, val_report = evaluate(model, val_iterator, criterion, config)
 
-                val_loss, val_acc, val_report = evaluate(model, val_iterator, criterion, config)
+                val_loss = evaluate(model, val_iterator, criterion, config)
 
                 c = global_step // config.print_step
 
                 writer.add_scalar("loss/train", train_loss, c)
                 writer.add_scalar("loss/val", val_loss, c)
 
-                writer.add_scalar("acc/train", train_acc, c)
-                writer.add_scalar("acc/val", val_acc, c)
+                # writer.add_scalar("acc/train", train_acc, c)
+                # writer.add_scalar("acc/val", val_acc, c)
 
                 logging.info("loss/train: %0.3f, %d" % (train_loss, c))
                 logging.info("loss/val: %0.3f, %d" % (val_loss, c))
-                logging.info("acc/train: %0.3f, %d" % (train_acc, c))
-                logging.info("acc/val: %0.3f, %d" % (val_acc, c))
+                # logging.info("acc/train: %0.3f, %d" % (train_acc, c))
+                # logging.info("acc/val: %0.3f, %d" % (val_acc, c))
 
-                for label in config.class_list:
-                    writer.add_scalar(label + ":f1/train", train_report[label]['f1-score'], c)
-                    writer.add_scalar(label + ":f1/dev", val_report[label]['f1-score'], c)
-                    print(label + ":f1/train", train_report[label]['f1-score'], c)
-                    print(label + ":f1/dev", val_report[label]['f1-score'], c)
+                # for label in config.class_list:
+                #     writer.add_scalar(label + ":f1/train", train_report[label]['f1-score'], c)
+                #     writer.add_scalar(label + ":f1/dev", val_report[label]['f1-score'], c)
+                #     print(label + ":f1/train", train_report[label]['f1-score'], c)
+                #     print(label + ":f1/dev", val_report[label]['f1-score'], c)
 
-                writer.add_scalar("weighted avg:f1/train", train_report['weighted avg']['f1-score'], c)
-                writer.add_scalar("weighted avg:f1/dev", val_report['weighted avg']['f1-score'], c)
+                # writer.add_scalar("weighted avg:f1/train", train_report['weighted avg']['f1-score'], c)
+                # writer.add_scalar("weighted avg:f1/dev", val_report['weighted avg']['f1-score'], c)
 
-                logging.info("weighted avg:f1/train: %0.3f, %d " % (train_report['weighted avg']['f1-score'], c))
-                logging.info("weighted avg:f1/dev %0.3f, %d " % (val_report['weighted avg']['f1-score'], c))
+                # logging.info("weighted avg:f1/train: %0.3f, %d " % (train_report['weighted avg']['f1-score'], c))
+                # logging.info("weighted avg:f1/dev %0.3f, %d " % (val_report['weighted avg']['f1-score'], c))
 
-                if val_report['weighted avg']['f1-score'] > f_score:
-                    f_score = val_report['weighted avg']['f1-score']
-                    logging.info('best weighted avg: %0.3f ' % f_score)
+                if best_loss > val_loss:
+                    best_loss = val_loss
+                    logging.info('=' * 50)
+                    logging.info('best_loss: %0.3f ' % best_loss)
                     torch.save({'epoch': epoch,
-                                'model_state_dict': model.state_dict(),
-                                'optimizer_state_dict': optimizer.state_dict(),
-                                'f_score': f_score},
+                                'model_state_dict': model.state_dict()
+                                },
                                config.save_path)
 
                 model.train()
         scheduler.step()
-        print('Epoch {}, lr {}'.format(epoch, optimizer.param_groups[0]['lr']))
         logging.info('Epoch {}, lr {}'.format(epoch, optimizer.param_groups[0]['lr']))
 
 
 # start training
 train(model, train_iterator, val_iterator, optimizer, criterion, config)
 
-print('finished training')
 logging.info('finished training')
-test_loss, test_acc, test_report = evaluate(model, test_iterator, criterion, config)
-print("-------------- Test -------------")
+
+def evaluation(model, iterator, config):
+    model.eval()
+    all_preds = np.array([], dtype=int)
+    all_labels = np.array([], dtype=int)
+    with torch.no_grad():
+        for batch in iterator:
+            logits = model(batch.text)
+            label = batch.label.detach().cpu().numpy()
+            preds = logits.detach().cpu().numpy()
+            preds = np.argmax(preds, axis=1)
+            all_preds = np.append(all_preds, preds)
+            all_labels = np.append(all_labels, label)
+    return classifiction_metric(all_preds, all_labels, config.class_list)
+
+# evaluation
 logging.info("-------------- Test -------------")
+
+test_loss, test_acc, test_report = evaluation(model, test_iterator, config)
 logging.info('-' * 50)
-print("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(test_loss, test_acc, test_report))
-logging.info("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(test_loss, test_acc,test_report))
+logging.info("\t test Loss: {}, \t test acc: {}, \t test report: {}".format(test_loss, test_acc, test_report))

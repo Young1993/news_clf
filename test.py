@@ -1,12 +1,16 @@
-import jieba.analyse
+# import jieba.analyse
 import pandas as pd
 import numpy as np
 import codecs
 
+a = (np.arange(6).reshape(2,3) + 10) / 20
+print(a)
+print(np.argmax(a, axis=1))
+
 # load stop words
 def load_stopwords():
     stopwords = []
-    with codecs.open('./stopwords.txt', 'r', encoding='utf-8') as f:
+    with codecs.open('tmp/stopwords.txt', 'r', encoding='utf-8') as f:
         for line in f.readlines():
             # print(line.strip())
             stopwords.append(line.strip())
@@ -26,7 +30,7 @@ class Data():
         self.data = []
         self.target = []
         self.target_names = []
-        self.class_name = ['社会', '要闻', '健康', '科技', '教育']
+        self.class_name = ['社会', '时政', '健康', '科技', '教育']
 
     def load_data(self, path):
         df = pd.read_csv(path) #, nrows=30

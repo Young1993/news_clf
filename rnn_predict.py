@@ -15,7 +15,7 @@ class Config(object):
     def __init__(self, embedding, type):
         self.clip = 15
         self.model_name = 'rnn'
-        self.class_list = ['教育', '财经', '要闻', '科技', '社会', '健康']
+        self.class_list = ['教育', '财经', '时政', '科技', '社会', '健康']
         # self.vocab_path = dataset + '/data/vocab.pkl'                                # 词表
         self.save_path = './models/' + self.model_name + '.pt'  # 模型训练结果
         self.log_path = './logs/' + self.model_name
@@ -148,19 +148,7 @@ model = News_clf(config, word_emb)
 model = model.to(config.device)
 dict = torch.load(config.save_path, map_location=config.device)
 model.load_state_dict(dict['model_state_dict'])
-# if torch.cuda.is_available():
-#     model.load_state_dict(dict['model_state_dict'])
-# else:
-#     model.load_state_dict(dict['model_state_dict'])
 model.eval()
-
-# if torch.cuda.is_available():
-#     df = pd.read_csv('./data/sample.csv')
-# else:
-#     df = pd.read_csv('./data/fold/sample.csv', nrows=20)
-#
-# df['predict'] = None
-
 
 class News():
     def __init__(self, s):
