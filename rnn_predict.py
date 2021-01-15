@@ -6,7 +6,6 @@ import math
 from torchtext import data
 from torchtext import vocab
 import jieba
-# import pandas as pd
 
 
 class Config(object):
@@ -149,30 +148,30 @@ dict = torch.load(config.save_path, map_location=config.device)
 model.load_state_dict(dict['model_state_dict'])
 model.eval()
 
-from sklearn import metrics
-def classifiction_metric(preds, labels, label_list):
-    acc = metrics.accuracy_score(labels, preds)
-    labels_list = [i for i in range(len(label_list))]
-    report = metrics.classification_report(
-        labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
-    return acc, report
-def evaluation(model, iterator, config):
-    model.eval()
-    all_preds = np.array([], dtype=int)
-    all_labels = np.array([], dtype=int)
-    with torch.no_grad():
-        for batch in iterator:
-            logits = model(batch.text)
-            label = batch.label.detach().cpu().numpy()
-            preds = logits.detach().cpu().numpy()
-            preds = np.argmax(preds, axis=1)
-            all_preds = np.append(all_preds, preds)
-            all_labels = np.append(all_labels, label)
-    return classifiction_metric(all_preds, all_labels, config.class_list)
-
-# evaluation
-test_acc, test_report = evaluation(model, test_iterator, config)
-print(test_acc, test_report)
+# from sklearn import metrics
+# def classifiction_metric(preds, labels, label_list):
+#     acc = metrics.accuracy_score(labels, preds)
+#     labels_list = [i for i in range(len(label_list))]
+#     report = metrics.classification_report(
+#         labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
+#     return acc, report
+# def evaluation(model, iterator, config):
+#     model.eval()
+#     all_preds = np.array([], dtype=int)
+#     all_labels = np.array([], dtype=int)
+#     with torch.no_grad():
+#         for batch in iterator:
+#             logits = model(batch.text)
+#             label = batch.label.detach().cpu().numpy()
+#             preds = logits.detach().cpu().numpy()
+#             preds = np.argmax(preds, axis=1)
+#             all_preds = np.append(all_preds, preds)
+#             all_labels = np.append(all_labels, label)
+#     return classifiction_metric(all_preds, all_labels, config.class_list)
+#
+# # evaluation
+# test_acc, test_report = evaluation(model, test_iterator, config)
+# print(test_acc, test_report)
 
 class News():
     def __init__(self, s):
@@ -192,20 +191,22 @@ def predict_label(t, c):
         print('label:', config.class_list[index])
         return config.class_list[index]
 
-# for i in range(len(df)):
-#     tmp = str(df['title'][i]) # if type(df['title'][i])
-#     c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
-#     input_doc = tokenizer(tmp + c)
-#     input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
-#         input_doc) < config.pad_size else input_doc[:config.pad_size]
-#     indexed = [text_field.vocab.stoi[t] for t in input_doc]
-#     with torch.no_grad():
-#         res = model(News(torch.tensor(indexed).to(config.device)).text)
-#         print(res.detach().cpu().numpy()[0])
-#         resp = res.detach().cpu().numpy()[0]
-#         index = np.argmax(resp)
-#         # if index == 2:
-#         #     df['predict'][i] = '要闻'
-#         # else:
-#         df['predict'][i] = config.class_list[index]
-# df.to_csv('predict.csv', index=False)
+
+import pandas as pd
+df = pd.read_csv('./data/sample.csv')
+df.predict = None
+df = df[1000:2000]
+for i in range(1000, 2000):
+    tmp = str(df['title'][i]) # if type(df['title'][i])
+    c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
+    input_doc = tokenizer(tmp + c)
+    input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
+        input_doc) < config.pad_size else input_doc[:config.pad_size]
+    indexed = [text_field.vocab.stoi[t] for t in input_doc]
+    with torch.no_grad():
+        res = model(News(torch.tensor(indexed).to(config.device)).text)
+        resp = res.detach().cpu().numpy()[0]
+        print('value: ', resp)
+        index = np.argmax(resp)
+        df['predict'][i] = config.class_list[index]
+df.to_csv('predict.csv', index=False)
