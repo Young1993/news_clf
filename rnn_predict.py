@@ -192,22 +192,22 @@ def predict_label(t, c):
         return config.class_list[index]
 
 
-import pandas as pd
-df = pd.read_csv('./data/sample.csv')
-df['predict'] = None
-for i in range(len(df)):
-    tmp = str(df['title'][i]) # if type(df['title'][i])
-    c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
-    input_doc = tokenizer(tmp + c)
-    input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
-        input_doc) < config.pad_size else input_doc[:config.pad_size]
-    indexed = [text_field.vocab.stoi[t] for t in input_doc]
-
-    with torch.no_grad():
-        res = model(News(torch.tensor(indexed).to(config.device)).text)
-        resp = res.detach().cpu().numpy()[0]
-        print('value: ', resp)
-        index = np.argmax(resp)
-        df['predict'][i] = config.class_list[index]
-
-df.to_csv('predict.csv', index=False)
+# import pandas as pd
+# df = pd.read_csv('./data/sample.csv')
+# df['predict'] = None
+# for i in range(len(df)):
+#     tmp = str(df['title'][i]) # if type(df['title'][i])
+#     c = str(df['content'][i]) # if type(df['content'][i]) == str else ''
+#     input_doc = tokenizer(tmp + c)
+#     input_doc = input_doc + ['<pad>'] * (config.pad_size - len(input_doc)) if len(
+#         input_doc) < config.pad_size else input_doc[:config.pad_size]
+#     indexed = [text_field.vocab.stoi[t] for t in input_doc]
+#
+#     with torch.no_grad():
+#         res = model(News(torch.tensor(indexed).to(config.device)).text)
+#         resp = res.detach().cpu().numpy()[0]
+#         print('value: ', resp)
+#         index = np.argmax(resp)
+#         df['predict'][i] = config.class_list[index]
+#
+# df.to_csv('predict.csv', index=False)
