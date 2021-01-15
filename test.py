@@ -2,10 +2,11 @@
 import pandas as pd
 import numpy as np
 import codecs
+import torch.nn.functional as F
 
-a = (np.arange(6).reshape(2,3) + 10) / 20
-print(a)
-print(np.argmax(a, axis=1))
+a = np.array([0.55389804, -6.314381, 2.2801042, -0.46613902, -6.0917926])
+print(F.softmax(a, dim=-1))
+
 
 # load stop words
 def load_stopwords():
@@ -16,6 +17,7 @@ def load_stopwords():
             stopwords.append(line.strip())
     return stopwords
 
+
 def extract_keywords(s):
     # jieba.analyse.textrank
     tags = jieba.analyse.extract_tags(s, topK=35, withWeight=True, allowPOS=(['n', 'v', 'nt', 'vn']))
@@ -25,6 +27,7 @@ def extract_keywords(s):
     print(res)
     return res
 
+
 class Data():
     def __init__(self):
         self.data = []
@@ -33,7 +36,7 @@ class Data():
         self.class_name = ['社会', '时政', '健康', '科技', '教育']
 
     def load_data(self, path):
-        df = pd.read_csv(path) #, nrows=30
+        df = pd.read_csv(path)  # , nrows=30
         for i in range(len(df)):
             tmp = extract_keywords(df['title'][i] + '  ' + df['content'][i])
             self.data.append(tmp)

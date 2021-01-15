@@ -194,6 +194,7 @@ def predict_label(t, c):
 
 import pandas as pd
 df = pd.read_csv('./data/sample.csv')
+df = df.sample(frac=1)
 df['predict'] = None
 df = df[1000:2000]
 for i in range(1000, 2000):
