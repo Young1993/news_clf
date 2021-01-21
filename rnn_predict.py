@@ -148,28 +148,33 @@ dict = torch.load(config.save_path, map_location=config.device)
 model.load_state_dict(dict['model_state_dict'])
 model.eval()
 
-# from sklearn import metrics
-# def classifiction_metric(preds, labels, label_list):
-#     acc = metrics.accuracy_score(labels, preds)
-#     labels_list = [i for i in range(len(label_list))]
-#     report = metrics.classification_report(
-#         labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
-#     return acc, report
-# def evaluation(model, iterator, config):
-#     model.eval()
-#     all_preds = np.array([], dtype=int)
-#     all_labels = np.array([], dtype=int)
-#     with torch.no_grad():
-#         for batch in iterator:
-#             logits = model(batch.text)
-#             label = batch.label.detach().cpu().numpy()
-#             preds = logits.detach().cpu().numpy()
-#             preds = np.argmax(preds, axis=1)
-#             all_preds = np.append(all_preds, preds)
-#             all_labels = np.append(all_labels, label)
-#     return classifiction_metric(all_preds, all_labels, config.class_list)
-#
-# # evaluation
+from sklearn import metrics
+def classifiction_metric(preds, labels, label_list):
+    acc = metrics.accuracy_score(labels, preds)
+    labels_list = [i for i in range(len(label_list))]
+    report = metrics.classification_report(
+        labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
+    return acc, report
+def evaluation(model, iterator, config):
+    model.eval()
+    all_preds = np.array([], dtype=int)
+    all_labels = np.array([], dtype=int)
+    with torch.no_grad():
+        for batch in iterator:
+            logits = model(batch.text)
+            label = batch.label.detach().cpu().numpy()
+
+            logits = F.softmax(logits, dim=1)
+
+            preds = logits.detach().cpu().numpy()
+
+            preds = np.argmax(preds, axis=1)
+
+            all_preds = np.append(all_preds, preds)
+            all_labels = np.append(all_labels, label)
+    return classifiction_metric(all_preds, all_labels, config.class_list)
+
+# evaluation
 # test_acc, test_report = evaluation(model, test_iterator, config)
 # print(test_acc, test_report)
 
@@ -186,10 +191,15 @@ def predict_label(t, c):
     with torch.no_grad():
         res = model(News(torch.tensor(indexed).to(config.device)).text)
         # print(res.detach().cpu().numpy()[0])
+        res = F.softmax(res, dim=1)
         resp = res.detach().cpu().numpy()[0]
         index = np.argmax(resp)
-        print('label:', config.class_list[index])
-        return config.class_list[index]
+
+        if resp[index] > 0.5:
+            print('label:', config.class_list[index])
+            return config.class_list[index]
+
+    return config.class_list[-1]
 
 
 # import pandas as pd

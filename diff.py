@@ -63,11 +63,11 @@ def tokenizer(s):
 #     c = df['content'][i] if type(df['content'][i]) == str else ''
 #     print(i)
 
-df = pd.read_csv('./predict.csv')
-df1 = df[:200]
-df2 = df[1000: 1200]
-df3 = df[2000: 2200]
-df4 = df[3000: 3200]
-df5 = df[4000: 4200]
+df = pd.read_csv('./tmp/predict.csv')
+df1 = df[200:400]
+df2 = df[1200: 1400]
+df3 = df[2200: 2400]
+df4 = df[3200: 3400]
+df5 = df[4200: 4400]
 df6 = pd.concat([df1,df2,df3,df4,df5], ignore_index=True, sort=False)
-df6.to_csv('./sample_predict.csv', index=False)
+df6.to_csv('./tmp/sample_predict.csv', index=False)

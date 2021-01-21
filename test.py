@@ -1,12 +1,14 @@
 # import jieba.analyse
+
+import jieba
+from torchtext import data
+from torchtext import vocab
+
 import pandas as pd
 import numpy as np
+import torch
 import codecs
 import torch.nn.functional as F
-
-a = np.array([0.55389804, -6.314381, 2.2801042, -0.46613902, -6.0917926])
-print(F.softmax(a, dim=-1))
-
 
 # load stop words
 def load_stopwords():
@@ -43,3 +45,44 @@ class Data():
             self.target.append(self.class_name.index(df['category'][i]))
             self.target_names.append(df['category'][i])
         self.target = np.asarray(self.target)
+
+import dill
+
+embedding = './data/sgns.sogou.word'
+
+def tokenizer(s):
+    return jieba.lcut(s)
+
+# load data
+def load_news(config, text_field, band_field):
+    fields = {
+        'text': ('text', text_field),
+        'label': ('label', band_field)
+    }
+
+    word_vectors = vocab.Vectors(config.embedding_file)
+
+    train, val, test = data.TabularDataset.splits(
+        path=config.data_path, train='train.csv', validation='val.csv',
+        test='test.csv', format='csv', fields=fields)
+
+    print("the size of train: {}, dev:{}, test:{}".format(
+        len(train.examples), len(val.examples), len(test.examples)))
+
+    text_field.build_vocab(train, val, test, max_size=config.n_vocab, vectors=word_vectors,
+                           unk_init=torch.Tensor.normal_)
+    band_field.build_vocab(train, val, test)
+
+    train_iter, val_iter, test_iter = data.BucketIterator.splits(
+        (train, val, test), batch_sizes=(config.batch_size, config.batch_size, config.batch_size), sort=False,
+        device=config.device, sort_within_batch=False, shuffle=False)
+
+
+
+# data loader and split Chinese
+text_field = data.Field(tokenize=tokenizer, include_lengths=True, fix_length=512)
+
+band_field = data.Field(sequential=False, use_vocab=False, batch_first=True,
+                        dtype=torch.int64, preprocessing=data.Pipeline(lambda x: int(x)))
+
+train_iterator, val_iterator, test_iterator = load_news(config, text_field, band_field)
