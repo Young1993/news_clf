@@ -6,6 +6,28 @@ import jieba
 import json
 
 
+def filter_tags(htmlstr):
+    # 先过滤CDATA
+    re_cdata = re.compile('//<!\[CDATA\[[^>]*//\]\]>', re.I)  # 匹配CDATA
+    re_script = re.compile('<\s*script[^>]*>[^<]*<\s*/\s*script\s*>', re.I)  # Script
+    re_style = re.compile('<\s*style[^>]*>[^<]*<\s*/\s*style\s*>', re.I)  # style
+    re_br = re.compile('<br\s*?/?>')  # 处理换行
+    re_h = re.compile('</?\w+[^>]*>')  # HTML标签
+    re_comment = re.compile('<!--[^>]*-->')  # HTML注释
+    s = re_cdata.sub('', htmlstr)  # 去掉CDATA
+    s = re_script.sub('', s)  # 去掉SCRIPT
+    s = re_style.sub('', s)  # 去掉style
+    s = re_br.sub('', s)  # 将br转换为 空字符串
+    s = re_h.sub('', s)  # 去掉HTML 标签
+    s = re_comment.sub('', s)  # 去掉HTML注释
+    # 去掉多余的空行
+    blank_line = re.compile('\n+')
+    s = blank_line.sub('\n', s)
+    return s
+
+def process_news():
+    filter_tags()
+
 # 教育 41936
 # 财经 37098
 # 时政 63086
@@ -134,6 +156,7 @@ def statistics(filename='./fold/train.csv'):
     for g in df.groupby('label'):
         print(g[0], len(g[1]))
 
+
 # handle string
 def handle_str(s):
     try:
@@ -163,6 +186,7 @@ def handle_predict():
     df1 = df1.rename(columns={'predict': 'label'})
     df1.to_csv('./data/news/labeled.csv', index=False)
 
+
 def handle_label():
     df = pd.read_csv('./data/raw.csv')
 
@@ -174,20 +198,21 @@ def handle_label():
 
     df.to_csv('./data/raw.csv', index=False)
 
+
 if __name__ == '__main__':
-    # 处理错误标签的标记数据
-    # handle_wrong_data()
-    # 处理预测的数据
-    # handle_predict()
-    # 合并数据
-    # merge_data()
-    # 统计分析数据
-    # statistics('./data/raw.csv')
-    # 处理标签
-    # handle_label()
-    # 分割出数据成 train、val、test
-    # split_data()
-    # 处理导出到 fold
-    export()
-    # 处理网易新闻给过来的数据
-    # labeled_data()
+# 处理错误标签的标记数据
+# handle_wrong_data()
+# 处理预测的数据
+# handle_predict()
+# 合并数据
+# merge_data()
+# 统计分析数据
+# statistics('./data/raw.csv')
+# 处理标签
+# handle_label()
+# 分割出数据成 train、val、test
+# split_data()
+# 处理导出到 fold
+# export()
+# 处理网易新闻给过来的数据
+# labeled_data()
