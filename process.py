@@ -113,7 +113,7 @@ def merge_data():
 def split_data(file='./data/raw.csv', data_dir='./data/train'):
     df = pd.read_csv(file)
     print(df.info())
-    df = df.sample(frac=1)
+    df = df.sample(frac=0.1)
     split_1 = int(0.82 * len(df))
     split_2 = int(0.91 * len(df))
     train_data = df[:split_1]
