@@ -4,7 +4,8 @@ import re
 import codecs
 import jieba
 import json
-import tqdm
+# import tqdm
+
 
 def filter_tags(htmlstr):
     # 先过滤CDATA
@@ -25,15 +26,24 @@ def filter_tags(htmlstr):
     s = blank_line.sub('\n', s)
     return s
 
+
 def process_news():
+    df_label = pd.read_csv('./dict.csv', usecols=['label'])
+    label_list = df_label.label.tolist()
     news = []
-    with codecs.open('./article_for_cat', 'r', 'utf-8') as f:
+    with codecs.open('../article_for_cat', 'r', 'utf-8') as f:
         lines = f.readlines()
-        for line in tqdm(lines):
+        for line in lines:
             tmp = json.loads(line)
             tmp['category'] = tmp['category'].split('-')[0]
+            tmp['category'] = label_list.index(tmp['category'])
             tmp['content'] = filter_tags(tmp['content'])
-            print(tmp['content'])
+            if len(tmp['content']) > 20:
+                print(tmp['info_id'])
+                news.append(tmp)
+    df = pd.DataFrame(news)
+    df.to_csv('./data/news.csv', index=False)
+
 
 # 教育 41936
 # 财经 37098
