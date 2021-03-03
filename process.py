@@ -31,7 +31,7 @@ def process_news():
     df_label = pd.read_csv('./dict.csv', usecols=['label'])
     label_list = df_label.label.tolist()
     news = []
-    with codecs.open('../article_for_cat', 'r', 'utf-8') as f:
+    with codecs.open('./article_for_cat', 'r', 'utf-8') as f:
         lines = f.readlines()
         for line in lines:
             tmp = json.loads(line)
