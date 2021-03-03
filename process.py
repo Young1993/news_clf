@@ -110,8 +110,8 @@ def merge_data():
 
 
 # 分割 data/ 数据
-def split_data():
-    df = pd.read_csv('./data/raw.csv')
+def split_data(file='./data/raw.csv', data_dir='./data/train'):
+    df = pd.read_csv(file)
     print(df.info())
     df = df.sample(frac=1)
     split_1 = int(0.82 * len(df))
@@ -119,9 +119,9 @@ def split_data():
     train_data = df[:split_1]
     val_data = df[split_1:split_2]
     test_data = df[split_2:]
-    train_data.to_csv('./data/train/train.csv', index=False)
-    val_data.to_csv('./data/train/val.csv', index=False)
-    test_data.to_csv('./data/train/test.csv', index=False)
+    train_data.to_csv(data_dir + '/train.csv', index=False)
+    val_data.to_csv(data_dir + './val.csv', index=False)
+    test_data.to_csv(data_dir + './test.csv', index=False)
 
 
 '''
@@ -218,7 +218,8 @@ def handle_label():
 
 if __name__ == '__main__':
     # handle the whole classes of news
-    process_news()
+    # process_news()
+    split_data(file='./data/news.csv', data_dir='./data')
 # 处理错误标签的标记数据
 # handle_wrong_data()
 # 处理预测的数据
