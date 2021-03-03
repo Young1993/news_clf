@@ -4,7 +4,7 @@ import re
 import codecs
 import jieba
 import json
-
+import tqdm
 
 def filter_tags(htmlstr):
     # 先过滤CDATA
@@ -26,7 +26,14 @@ def filter_tags(htmlstr):
     return s
 
 def process_news():
-    filter_tags()
+    news = []
+    with codecs.open('./article_for_cat', 'r', 'utf-8') as f:
+        lines = f.readlines()
+        for line in tqdm(lines):
+            tmp = json.loads(line)
+            tmp['category'] = tmp['category'].split('-')[0]
+            tmp['content'] = filter_tags(tmp['content'])
+            print(tmp['content'])
 
 # 教育 41936
 # 财经 37098
@@ -200,6 +207,8 @@ def handle_label():
 
 
 if __name__ == '__main__':
+    # handle the whole classes of news
+    process_news()
 # 处理错误标签的标记数据
 # handle_wrong_data()
 # 处理预测的数据

@@ -106,7 +106,7 @@ def evaluate(model, iterator, device, criterion, config):
 
             output = model(input_ids=input_ids, token_type_ids=token_type_ids, attention_mask=attention_mask)
 
-            loss = criterion(output.view(-1, config.num_classes), labels)
+            loss = criterion(output.view(-1, config.classes_number), labels)
 
             epoch_loss += loss.item()
     return epoch_loss / len(iterator)
@@ -314,7 +314,7 @@ def main():
     parser.add_argument("--logs", default='./logs/', help="Location of logs files.")
     parser.add_argument("--save-dir", default='./models/news_clf_v1.0.pt', help="models files.")
     parser.add_argument("--max-length", default=512)
-    parser.add_argument("--batch-size", default=32)  # 256 or 128
+    parser.add_argument("--batch-size", default=16)  # 256 or 128
     parser.add_argument("--epoch", default=15)
     parser.add_argument("--clip", default=10)
     parser.add_argument("--learning-rate", default=3e-4)
