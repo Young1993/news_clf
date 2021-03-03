@@ -120,8 +120,8 @@ def split_data(file='./data/raw.csv', data_dir='./data/train'):
     val_data = df[split_1:split_2]
     test_data = df[split_2:]
     train_data.to_csv(data_dir + '/train.csv', index=False)
-    val_data.to_csv(data_dir + './val.csv', index=False)
-    test_data.to_csv(data_dir + './test.csv', index=False)
+    val_data.to_csv(data_dir + '/val.csv', index=False)
+    test_data.to_csv(data_dir + '/test.csv', index=False)
 
 
 '''
