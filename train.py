@@ -41,7 +41,8 @@ def statistics(tokenizer, df_train):
 
 class TQReviewDataset(Dataset):
 
-    def __init__(self, reviews, targets, tokenizer, max_len, config):
+    def __init__(self, titles, reviews, targets, tokenizer, max_len, config):
+        self.titles = titles
         self.reviews = reviews
         self.targets = targets
         self.tokenizer = tokenizer
@@ -52,10 +53,12 @@ class TQReviewDataset(Dataset):
         return len(self.reviews)
 
     def __getitem__(self, item):
+        title = str(self.titles[item])
         review = str(self.reviews[item])
         target = self.targets[item]
 
         encoding = self.tokenizer.encode_plus(
+            title,
             review,
             add_special_tokens=True,
             truncation=True,
@@ -68,7 +71,7 @@ class TQReviewDataset(Dataset):
         )
 
         return {
-            'review_text': review,
+            'review_text': title + review,
             'input_ids': encoding['input_ids'].flatten(),
             'attention_mask': encoding['attention_mask'].flatten(),
             'token_type_ids': encoding['token_type_ids'].flatten(),
@@ -78,8 +81,9 @@ class TQReviewDataset(Dataset):
 
 def create_data_loader(df, tokenizer, args):
     ds = TQReviewDataset(
-        reviews=df.text.to_numpy(),  # text
-        targets=df.label.to_numpy(),  # single labels
+        titles= df.title.to_numpy(), # title
+        reviews=df.content.to_numpy(),  # text
+        targets=df.category.to_numpy(),  # single labels
         tokenizer=tokenizer,
         max_len=args.max_length,
         config=args
@@ -314,10 +318,10 @@ def main():
     parser.add_argument("--logs", default='./logs/', help="Location of logs files.")
     parser.add_argument("--save-dir", default='./models/news_clf_v1.0.pt', help="models files.")
     parser.add_argument("--max-length", default=512)
-    parser.add_argument("--batch-size", default=16)  # 256 or 128
+    parser.add_argument("--batch-size", default=24)  # 256 or 128
     parser.add_argument("--epoch", default=15)
     parser.add_argument("--clip", default=10)
-    parser.add_argument("--learning-rate", default=3e-4)
+    parser.add_argument("--learning-rate", default=1e-4)
     parser.add_argument("--print-step", default=100)  # 100
     parser.add_argument("--classes-number", default=38)
 

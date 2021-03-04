@@ -33,12 +33,13 @@ def process_news():
     news = []
     with codecs.open('./article_for_cat', 'r', 'utf-8') as f:
         lines = f.readlines()
-        for line in lines:
+        for line in lines[:100]:
             tmp = json.loads(line)
             tmp['category'] = tmp['category'].split('-')[0]
             tmp['category'] = label_list.index(tmp['category'])
+
             tmp['content'] = filter_tags(tmp['content'])
-            if len(tmp['content']) > 20:
+            if len(tmp['content']) + len(tmp['title']) > 25:
                 print(tmp['info_id'])
                 news.append(tmp)
     df = pd.DataFrame(news)
