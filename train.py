@@ -19,7 +19,7 @@ def classifiction_metric(preds, labels, label_list):
     acc = metrics.accuracy_score(labels, preds)
     labels_list = [i for i in range(label_list)]
     report = metrics.classification_report(
-        labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
+        labels, preds, labels=labels_list, target_names=labels_list, digits=4, output_dict=True)
     return acc, report
 
 
@@ -332,12 +332,14 @@ def main():
     parser.add_argument("--train", default=False)
 
     args = parser.parse_args()
-    logging.basicConfig(filemode='w', filename="./logs/train.txt", level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s')
     if args.train:
+        logging.basicConfig(filemode='w', filename="./logs/train.txt", level=logging.INFO,
+                            format='%(asctime)s %(levelname)s %(message)s')
         logging.info('training...')
         run_fine_tune(args)
     else:
+        logging.basicConfig(filemode='w', filename="./logs/evaluate.txt", level=logging.INFO,
+                            format='%(asctime)s %(levelname)s %(message)s')
         logging.info('evaluate...')
         run_evaluate(args)
 
