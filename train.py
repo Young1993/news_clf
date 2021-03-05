@@ -309,7 +309,7 @@ def run_evaluate(args):
             all_preds = np.append(all_preds, preds)
             all_labels = np.append(all_labels, label)
 
-    return classifiction_metric(all_preds, all_labels, args.classes_number)
+    print(classifiction_metric(all_preds, all_labels, args.classes_number))
 
 
 def main():
