@@ -17,7 +17,7 @@ import time
 
 def classifiction_metric(preds, labels, label_list):
     acc = metrics.accuracy_score(labels, preds)
-    labels_list = [i for i in range(len(label_list))]
+    labels_list = [i for i in range(label_list)]
     report = metrics.classification_report(
         labels, preds, labels=labels_list, target_names=label_list, digits=4, output_dict=True)
     return acc, report
@@ -329,7 +329,7 @@ def main():
     parser.add_argument("--model",
                         default="hfl/chinese-electra-base-discriminator")  # hfl/chinese-electra-base-discriminator
     parser.add_argument("--hidden-size", default=768)  # 768 or 256
-    parser.add_argument("--train", default=True)
+    parser.add_argument("--train", default=False)
 
     args = parser.parse_args()
     logging.basicConfig(filemode='w', filename="./logs/train.txt", level=logging.INFO,
