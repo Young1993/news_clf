@@ -316,12 +316,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", default='./data', help="新闻数据文件")
     parser.add_argument("--logs", default='./logs/', help="Location of logs files.")
-    parser.add_argument("--save-dir", default='./models/news_clf_v1.0.pt', help="models files.")
+    parser.add_argument("--save-dir", default='./models/news_clf_v1.1.pt', help="models files.")
     parser.add_argument("--max-length", default=512)
-    parser.add_argument("--batch-size", default=24)  # 256 or 128
+    parser.add_argument("--batch-size", default=32)  # 256 or 128
     parser.add_argument("--epoch", default=15)
     parser.add_argument("--clip", default=10)
-    parser.add_argument("--learning-rate", default=1e-4)
+    parser.add_argument("--learning-rate", default=6e-5)
     parser.add_argument("--print-step", default=100)  # 100
     parser.add_argument("--classes-number", default=38)
 
@@ -329,7 +329,7 @@ def main():
     parser.add_argument("--model",
                         default="hfl/chinese-electra-base-discriminator")  # hfl/chinese-electra-base-discriminator
     parser.add_argument("--hidden-size", default=768)  # 768 or 256
-    parser.add_argument("--train", default=False)
+    parser.add_argument("--train", default=True)
 
     args = parser.parse_args()
     if args.train:
