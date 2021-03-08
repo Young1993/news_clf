@@ -220,7 +220,7 @@ def handle_label():
 if __name__ == '__main__':
     # handle the whole classes of news
     # process_news()
-    split_data(file='./data/news.csv', data_dir='./data')
+    # split_data(file='./data/news.csv', data_dir='./data')
 # 处理错误标签的标记数据
 # handle_wrong_data()
 # 处理预测的数据
@@ -228,7 +228,7 @@ if __name__ == '__main__':
 # 合并数据
 # merge_data()
 # 统计分析数据
-# statistics('./data/raw.csv')
+statistics('./data/news.csv')
 # 处理标签
 # handle_label()
 # 分割出数据成 train、val、test
