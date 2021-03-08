@@ -228,7 +228,7 @@ if __name__ == '__main__':
 # 合并数据
 # merge_data()
 # 统计分析数据
-statistics('./data/news.csv')
+    statistics('./data/news.csv')
 # 处理标签
 # handle_label()
 # 分割出数据成 train、val、test
