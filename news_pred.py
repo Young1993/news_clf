@@ -1,3 +1,4 @@
+# coding: utf-8
 from transformers import ElectraTokenizer, AutoModel
 import torch
 import pandas as pd
