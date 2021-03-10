@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-import rnn_predict
+# import rnn_predict
+import news_pred
 
 app = Flask(__name__)
 
@@ -12,7 +13,7 @@ def index():
 @app.route('/label', methods=['POST'])
 def predict_label():
     data = request.get_json()
-    res = rnn_predict.predict_label(data['title'], data['content'])
+    res = news_pred.predict_label(data['title'], data['content'])
 
     print('res: {}'.format(res))
     return jsonify({
